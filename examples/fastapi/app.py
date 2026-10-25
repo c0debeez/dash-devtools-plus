@@ -6,7 +6,7 @@ import asyncio
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
@@ -14,19 +14,20 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from dash import Dash, ctx, dcc, html, set_props  # noqa: E402
 from dash.exceptions import WebsocketDisconnected  # noqa: E402
-from fastapi import FastAPI  # noqa: E402
+from fastapi import FastAPI, HTTPException  # noqa: E402
+from pydantic import BaseModel, Field  # noqa: E402
 
 from dash_devtools_plus import configure_devtools_plus  # noqa: E402
 
 configure_devtools_plus(
-    default_locale="zh-CN",
+    default_locale="en",
     project_root=PROJECT_ROOT,
     editor_project_root=PROJECT_ROOT,
 )
 
-app = Dash(__name__, backend="fastapi", websocket_callbacks=True)
-server: FastAPI = app.server
-app.title = "FastAPI 示例 · Dash Devtools Plus"
+server = FastAPI(docs_url="/api/docs", redoc_url="/api/redoc")
+app = Dash(__name__, server=server, websocket_callbacks=True)
+app.title = "FastAPI Example · Dash Devtools Plus"
 
 
 @server.get("/api/health")
@@ -49,16 +50,65 @@ async def capabilities() -> dict[str, Any]:
     }
 
 
+class TaskCreate(BaseModel):
+    title: str = Field(min_length=1, max_length=80, examples=["Review API docs"])
+    priority: int = Field(
+        default=2, ge=1, le=5, description="1 is the highest priority"
+    )
+
+
+class Task(TaskCreate):
+    id: int
+    completed: bool = False
+
+
+demo_tasks: dict[int, Task] = {
+    1: Task(id=1, title="Explore Swagger UI", priority=1),
+    2: Task(id=2, title="Compare the ReDoc view", priority=2, completed=True),
+}
+
+
+@server.get("/api/tasks", response_model=list[Task], tags=["Demo tasks"])
+async def list_tasks(completed: Optional[bool] = None) -> list[Task]:
+    """Filter the example tasks by completion status."""
+
+    return [
+        task
+        for task in demo_tasks.values()
+        if completed is None or task.completed == completed
+    ]
+
+
+@server.get("/api/tasks/{task_id}", response_model=Task, tags=["Demo tasks"])
+async def get_task(task_id: int) -> Task:
+    """Look up one example task by its path parameter."""
+
+    if task_id not in demo_tasks:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return demo_tasks[task_id]
+
+
+@server.post("/api/tasks", response_model=Task, status_code=201, tags=["Demo tasks"])
+async def create_task(task: TaskCreate) -> Task:
+    """Create an in-memory task from a validated JSON request body."""
+
+    task_id = max(demo_tasks, default=0) + 1
+    created = Task(id=task_id, title=task.title, priority=task.priority)
+    demo_tasks[task_id] = created
+    return created
+
+
 app.layout = html.Div(
     html.Main(
         [
             html.Header(
                 [
                     html.P("FASTAPI + WEBSOCKET", className="eyebrow"),
-                    html.H1("实时心跳，不需要轮询。"),
+                    html.H1("A live heartbeat without polling."),
                     html.P(
-                        "这个页面由 FastAPI 承载。持久 WebSocket 回调会读取滑块值，"
-                        "并把服务器时间主动推送回来。",
+                        "This page is served by FastAPI. A persistent WebSocket "
+                        "callback reads the slider value and pushes server time "
+                        "updates to the browser.",
                         className="lede",
                     ),
                 ],
@@ -86,7 +136,7 @@ app.layout = html.Div(
                             html.Span("02", className="step-number"),
                             html.Div(
                                 [
-                                    html.Label("推送间隔", htmlFor="refresh-rate"),
+                                    html.Label("Push interval", htmlFor="refresh-rate"),
                                     dcc.Slider(
                                         id="refresh-rate",
                                         min=0.5,
@@ -110,10 +160,12 @@ app.layout = html.Div(
             ),
             html.Footer(
                 [
-                    "持久回调：ctx.websocket.get_prop → set_props · ",
+                    "Persistent callback: ctx.websocket.get_prop → set_props · ",
                     html.A(
-                        "查看 FastAPI 健康检查", href="/api/health", target="_blank"
+                        "View FastAPI health check", href="/api/health", target="_blank"
                     ),
+                    " · ",
+                    html.A("Browse API docs", href="/api/docs", target="_blank"),
                 ]
             ),
         ],
@@ -144,7 +196,7 @@ async def stream_server_time() -> None:
         set_props("live-clock", {"children": now})
         set_props(
             "stream-status",
-            {"children": f"WebSocket 已推送 · 每 {seconds:g} 秒更新一次"},
+            {"children": f"WebSocket update received · Update interval: {seconds:g} s"},
         )
         await asyncio.sleep(seconds)
 

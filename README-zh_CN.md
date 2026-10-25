@@ -42,7 +42,7 @@ uv add "git+https://github.com/c0debeez/dash-devtools-plus@fix/host-theme"
 
 ## ⚡ 快速开始
 
-当前源码和文档对应 **0.1.4（未发布）**。下方命令安装的是最新已发布版本；如需体验当前开发版，请按[源码安装说明](./docs/zh-CN/quick-start.md#体验未发布的-014)操作。
+下方命令安装的是最新已发布版本；如需体验当前开发版，请按[源码安装说明](./docs/zh-CN/quick-start.md#从源码安装)操作。
 
 ```bash
 pip install dash-devtools-plus -U
@@ -75,6 +75,7 @@ if __name__ == "__main__":
 | 依赖库 | 按标准库、Dash 组件库、Dash Hooks 库和其他库整理项目直接导入项。 | [查看说明](./docs/zh-CN/features/dependencies.md) |
 | 工具条换肤 | 预览并应用 Dash 原生 Dev Tools 工具栏与错误展示主题。 | [查看说明](./docs/zh-CN/features/toolbar-skins.md) |
 | 运行环境信息 | 汇总必要的 Python、系统、浏览器和第三方包版本，并一键复制 Issue 环境报告。 | [查看说明](./docs/zh-CN/features/runtime-environment.md) |
+| FastAPI 接口文档 | 在面板中切换 Swagger UI 和 ReDoc，或在独立页面打开，地址与服务端配置保持一致。 | [查看说明](./docs/zh-CN/features/fastapi-docs.md) |
 
 ## ⚙️ 可选配置
 
@@ -112,7 +113,7 @@ configure_devtools_plus(
 | `callback_performance` | 使用三种耗时特征鲜明的回调演示实时性能监控。 | `python examples/callback_performance/app.py` |
 | `intermediate` | 使用 Dash 内置组件构建的旅行预算规划器。 | `python examples/intermediate/app.py` |
 | `comprehensive` | 用于全功能验收的大型回调实验室。 | `python examples/comprehensive/app.py` |
-| `fastapi` | 使用持久 WebSocket 回调和 FastAPI 接口的服务端时间流演示。 | `python examples/fastapi/app.py` |
+| `fastapi` | 使用持久 WebSocket 回调、任务接口和自定义 Swagger UI/ReDoc 地址的演示。 | `python examples/fastapi/app.py` |
 
 它们默认共用 `8050` 端口，请一次只运行一个。使用完整回调实验室前请阅读[示例应用](./docs/zh-CN/examples.md)。
 
@@ -128,15 +129,17 @@ pip install "dash-devtools-plus[fastapi]"
 可参考 [`fastapi` 示例](./examples/fastapi/app.py)：它通过
 `websocket_callbacks=True`、`ctx.websocket.get_prop` 和 `set_props` 实现服务端
 时间流，同时提供自定义异步 FastAPI API。
+示例接口文档位于 `/api/docs` 和 `/api/redoc`。
 
 ## 🛠️ 开发
 
 按仓库约定配置开发环境后，运行：
 
 ```bash
-python -m pytest
+npm ci
 npm run test:frontend
 npm run build
+python -m pytest
 ```
 
 Python 代码使用 Ruff 检查：
@@ -146,7 +149,7 @@ ruff check .
 ruff format --check .
 ```
 
-前端构建产物会写入 `dash_devtools_plus/assets/`；修改前端源码后应重新构建并提交这些发布资源。
+前端构建产物会写入 `dash_devtools_plus/assets/`，该目录由 Git 忽略。修改前端源码后，以及运行 Python 测试、示例或 `python -m build` 前，请先执行 `npm run build`。CI 会在测试和打包前生成这些资源；发布的 Python 包仍包含它们。
 
 ## 🗺️ 文档导航
 

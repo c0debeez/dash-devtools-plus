@@ -2,7 +2,7 @@
 
 Your friendly map for exploring Dash Devtools Plus—from a first launch to a focused deep dive. ✨
 
-These guides and the updated callback screenshots describe **0.1.4 (unreleased)**. See [Quick start](quick-start.md#try-014-before-release) to run this checkout, and [Changelog](../../CHANGELOG.md) for the release summary.
+See [Quick start](quick-start.md#install-from-source) to run this checkout, and [Changelog](../../CHANGELOG.md) for the release summary.
 
 | Topic | Description |
 | --- | --- |
@@ -24,3 +24,4 @@ These guides and the updated callback screenshots describe **0.1.4 (unreleased)*
 | Imported dependencies | Direct project imports grouped by library category | [Open](features/dependencies.md) |
 | Toolbar skins | Preview and apply native Dash Dev Tools toolbar themes | [Open](features/toolbar-skins.md) |
 | Runtime environment | Collect and copy essential Python, system, browser, and package versions | [Open](features/runtime-environment.md) |
+| FastAPI API docs | Embed and switch between Swagger UI and ReDoc at the server's configured paths | [Open](features/fastapi-docs.md) |

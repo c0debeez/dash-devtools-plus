@@ -2,6 +2,7 @@ import React, {useCallback, useEffect, useMemo, useState} from "react";
 import {Button, ConfigProvider, Drawer, Segmented, Tabs, Tooltip, theme as themeAlgorithms} from "antd";
 import {
   ApartmentOutlined,
+  ApiOutlined,
   BgColorsOutlined,
   CameraOutlined,
   CloseOutlined,
@@ -16,9 +17,10 @@ import CallbackPanel from "./CallbackPanel";
 import ComponentInspectorPanel from "./ComponentInspectorPanel";
 import ComponentProbeOverlay from "./ComponentProbeOverlay";
 import DependenciesPanel from "./DependenciesPanel";
+import FastApiDocsPanel from "./FastApiDocsPanel";
 import DevtoolsAppearancePanel from "./DevtoolsAppearancePanel";
 import RuntimeEnvironmentPanel from "./RuntimeEnvironmentPanel";
-import {createNestedInspection} from "./componentInspector";
+import {createNestedInspection, inspectDashComponentReference} from "./componentInspector";
 import ServerMetricsPanel, {useServerMetrics} from "./ServerMetricsPanel";
 import StateSnapshotsPanel from "./StateSnapshotsPanel";
 import {createTranslator, normalizeLocale} from "./i18n";
@@ -74,6 +76,7 @@ function EnabledDevtoolsPlus({
   dependenciesEndpoint = "_dash-devtools-plus/dependencies",
   serverMetricsEndpoint = "_dash-devtools-plus/server-metrics",
   runtimeEnvironmentEndpoint = "_dash-devtools-plus/runtime-environment",
+  fastapiDocs = null,
 }) {
   const {popup, setPopup} = useDevtool();
   const isOpen = popup === POPUP_ID;
@@ -84,7 +87,9 @@ function EnabledDevtoolsPlus({
     resolveColorScheme(document.documentElement, window.matchMedia?.("(prefers-color-scheme: dark)")));
   const [nativeDevtoolsTheme, setNativeDevtoolsTheme] = useState(initialNativeDevtoolsTheme);
   const [activeTab, setActiveTab] = useState("callbacks");
+  const [callbackSearchRequest, setCallbackSearchRequest] = useState(null);
   const [inspectionTrail, setInspectionTrail] = useState([]);
+  const [inspectionOrigin, setInspectionOrigin] = useState(null);
   const inspection = inspectionTrail[inspectionTrail.length - 1] || null;
   const [isInspecting, setIsInspecting] = useState(false);
   const t = useMemo(() => createTranslator(locale), [locale]);
@@ -137,10 +142,22 @@ function EnabledDevtoolsPlus({
   }, [setPopup]);
   const completeInspection = useCallback((result) => {
     setInspectionTrail([result]);
+    setInspectionOrigin(null);
     setIsInspecting(false);
     setActiveTab("inspector");
     setPopup(POPUP_ID);
   }, [setPopup]);
+  const inspectSnapshotComponent = useCallback((result) => {
+    setInspectionTrail([result]);
+    setInspectionOrigin("snapshots");
+    setActiveTab("inspector");
+  }, []);
+  const returnToSnapshots = useCallback(() => setActiveTab("snapshots"), []);
+  const showComponentCallbacks = useCallback((query) => {
+    // A new request also reapplies the same ID after the user edits the search.
+    setCallbackSearchRequest({query});
+    setActiveTab("callbacks");
+  }, []);
   const inspectNestedComponent = useCallback((component, propName, valuePath) => {
     setInspectionTrail((current) => {
       const parent = current[current.length - 1];
@@ -150,6 +167,13 @@ function EnabledDevtoolsPlus({
   }, []);
   const navigateInspectionTrail = useCallback((index) => {
     setInspectionTrail((current) => current.slice(0, index + 1));
+  }, []);
+  const updateInspection = useCallback((updated) => {
+    setInspectionTrail(current => current.map((item, index) => {
+      if (index === current.length - 1 && updated) return {...updated, source: item.source};
+      const refreshed = inspectDashComponentReference(item);
+      return refreshed ? {...refreshed, source: item.source} : item;
+    }));
   }, []);
 
   return (
@@ -238,18 +262,9 @@ function EnabledDevtoolsPlus({
                 children: (
                   <CallbackPanel
                     endpoint={callbacksEndpoint}
+                    searchRequest={callbackSearchRequest}
                     isActive={isOpen && activeTab === "callbacks"}
                     accentColor={accentColor}
-                    t={t}
-                  />
-                ),
-              },
-              {
-                key: "server",
-                label: <span className="ddp-tab-label"><DashboardOutlined />{t("serverMetricsNav")}</span>,
-                children: (
-                  <ServerMetricsPanel
-                    monitor={serverMetrics}
                     t={t}
                   />
                 ),
@@ -261,9 +276,13 @@ function EnabledDevtoolsPlus({
                   <ComponentInspectorPanel
                     inspection={inspection}
                     inspectionTrail={inspectionTrail}
+                    origin={inspectionOrigin}
+                    onReturnToSnapshots={returnToSnapshots}
                     onInspectComponent={inspectNestedComponent}
                     onNavigate={navigateInspectionTrail}
                     onStart={startInspection}
+                    onShowCallbacks={showComponentCallbacks}
+                    onUpdateInspection={updateInspection}
                     t={t}
                   />
                 ),
@@ -271,7 +290,7 @@ function EnabledDevtoolsPlus({
               {
                 key: "snapshots",
                 label: <span className="ddp-tab-label"><CameraOutlined />{t("stateSnapshotsNav")}</span>,
-                children: <StateSnapshotsPanel locale={locale} t={t} />,
+                children: <StateSnapshotsPanel locale={locale} onInspectComponent={inspectSnapshotComponent} t={t} />,
               },
               {
                 key: "dependencies",
@@ -286,23 +305,38 @@ function EnabledDevtoolsPlus({
                 ),
               },
               {
-                key: "appearance",
-                label: <span className="ddp-tab-label"><BgColorsOutlined />{t("devtoolsAppearanceNav")}</span>,
-                children: (
-                  <DevtoolsAppearancePanel
-                    value={nativeDevtoolsTheme}
-                    onChange={setNativeDevtoolsTheme}
-                    t={t}
-                  />
-                ),
-              },
-              {
                 key: "environment",
                 label: <span className="ddp-tab-label"><DesktopOutlined />{t("runtimeEnvironmentNav")}</span>,
                 children: (
                   <RuntimeEnvironmentPanel
                     endpoint={runtimeEnvironmentEndpoint}
                     isActive={isOpen && activeTab === "environment"}
+                    t={t}
+                  />
+                ),
+              },
+              ...(fastapiDocs ? [{
+                key: "fastapi-docs",
+                label: <span className="ddp-tab-label"><ApiOutlined />{t("fastapiDocsNav")}</span>,
+                children: <FastApiDocsPanel docs={fastapiDocs} t={t} />,
+              }] : []),
+              {
+                key: "server",
+                label: <span className="ddp-tab-label"><DashboardOutlined />{t("serverMetricsNav")}</span>,
+                children: (
+                  <ServerMetricsPanel
+                    monitor={serverMetrics}
+                    t={t}
+                  />
+                ),
+              },
+              {
+                key: "appearance",
+                label: <span className="ddp-tab-label"><BgColorsOutlined />{t("devtoolsAppearanceNav")}</span>,
+                children: (
+                  <DevtoolsAppearancePanel
+                    value={nativeDevtoolsTheme}
+                    onChange={setNativeDevtoolsTheme}
                     t={t}
                   />
                 ),

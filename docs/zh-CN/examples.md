@@ -1,6 +1,6 @@
 # 🧪 示例应用
 
-0.1.4 开发版源码提供五个示例应用，均使用仓库根目录配置 `configure_devtools_plus`。建议先按[源码安装说明](quick-start.md#体验未发布的-014)安装当前版本；完整示例还需要 `feffery-antd-components` 和 `dash-mantine-components`。
+仓库源码提供五个示例应用，均使用仓库根目录配置 `configure_devtools_plus`。建议先按[源码安装说明](quick-start.md#从源码安装)安装当前版本；完整示例还需要 `feffery-antd-components` 和 `dash-mantine-components`。
 
 | 示例 | 用途 | 运行命令 |
 | --- | --- | --- |
@@ -8,7 +8,7 @@
 | `callback_performance` | 对比递增延时、固定延时轮询和即时浏览器端回调，集中体验实时性能监控。 | `python examples/callback_performance/app.py` |
 | `intermediate` | 使用 Dash 内置组件体验聚焦的旅行预算规划场景。 | `python examples/intermediate/app.py` |
 | `comprehensive` | 大规模覆盖回调拓扑、模式匹配、源码探查、快照、依赖库和工具栏主题。 | `python examples/comprehensive/app.py` |
-| `fastapi` | 通过 `backend="fastapi"` 运行 Dash，使用持久 WebSocket 回调流式推送服务端时间，并提供异步 API 接口。需要先执行 `pip install "dash-devtools-plus[fastapi]"`。 | `python examples/fastapi/app.py` |
+| `fastapi` | 将 FastAPI 服务传给 Dash，用持久 WebSocket 回调推送服务端时间，并在自定义 `/api/docs`、`/api/redoc` 页面展示任务接口。需要先执行 `pip install "dash-devtools-plus[fastapi]"`。 | `python examples/fastapi/app.py` |
 
 五个示例默认均使用 `8050` 端口，请一次只运行一个，然后访问 <http://127.0.0.1:8050>。按你想验证的问题挑选复杂度，让 Devtools Plus 带你看清每个环节 ✨。
 
@@ -25,6 +25,6 @@
 
 ## 完整回调实验室
 
-0.1.4 源码中的完整示例有意包含原生报错测试控件、后台与 WebSocket 注册形态，以及 131 条回调。它适合验收与压力检查，不建议将其刻意扩张的回调拓扑直接照搬到生产应用。
+源码中的完整示例有意包含原生报错测试控件、后台与 WebSocket 注册形态，以及 131 条回调。它适合验收与压力检查，不建议将其刻意扩张的回调拓扑直接照搬到生产应用。
 
 ![完整回调实验室](../../imgs/docs/comprehensive-example.webp)

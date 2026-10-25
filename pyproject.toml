@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools>=69", "wheel"]
+requires = ["setuptools>=77.0.3", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "dash-devtools-plus"
-version = "0.1.4"
+version = "0.2.0"
 description = "A focused developer console for Dash applications, powered by Dash hooks."
 readme = "README.md"
 requires-python = ">=3.9"

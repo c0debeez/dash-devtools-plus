@@ -44,7 +44,7 @@ Start a Dash application in debug mode, then select **Devtools Plus** from the n
 
 ## ⚡ Quick start
 
-This checkout and its documentation describe **0.1.4 (unreleased)**. The command below installs the latest published release; to try the current development version, follow the [source installation instructions](./docs/en/quick-start.md#try-014-before-release).
+The command below installs the latest published release; to try the current development version, follow the [source installation instructions](./docs/en/quick-start.md#install-from-source).
 
 ```bash
 pip install dash-devtools-plus -U
@@ -77,6 +77,7 @@ For full installation notes, see [Quick start](./docs/en/quick-start.md).
 | Imported dependencies | Direct project imports grouped as standard library, Dash components, Dash Hooks, or other libraries. | [Open guide](./docs/en/features/dependencies.md) |
 | Toolbar skins | Preview and apply native Dash Dev Tools toolbar and error-display themes. | [Open guide](./docs/en/features/toolbar-skins.md) |
 | Runtime environment | Collect essential Python, system, browser, and third-party package versions, then copy an issue-ready report. | [Open guide](./docs/en/features/runtime-environment.md) |
+| FastAPI API docs | View Swagger UI and ReDoc inside the panel or open either in a separate page, using the server's configured URLs. | [Open guide](./docs/en/features/fastapi-docs.md) |
 
 ## ⚙️ Optional configuration
 
@@ -114,7 +115,7 @@ Five applications in [`examples/`](./examples/) cover focused and increasingly c
 | `callback_performance` | Three contrasting callbacks for live performance monitoring. | `python examples/callback_performance/app.py` |
 | `intermediate` | A travel-budget planner built with Dash core components. | `python examples/intermediate/app.py` |
 | `comprehensive` | A large callback laboratory for acceptance testing all workspaces. | `python examples/comprehensive/app.py` |
-| `fastapi` | A WebSocket-powered server-time stream with FastAPI APIs. | `python examples/fastapi/app.py` |
+| `fastapi` | A WebSocket-powered server-time stream and sample task APIs with custom Swagger UI and ReDoc paths. | `python examples/fastapi/app.py` |
 
 They share port `8050`; run one at a time. Read [Example applications](./docs/en/examples.md) before using the comprehensive callback laboratory.
 
@@ -131,15 +132,17 @@ pip install "dash-devtools-plus[fastapi]"
 See the [`fastapi` example](./examples/fastapi/app.py) for a small server-time
 stream that uses `websocket_callbacks=True`, `ctx.websocket.get_prop`, and
 `set_props`, alongside custom asynchronous FastAPI APIs.
+Its API docs are available at `/api/docs` and `/api/redoc`.
 
 ## 🛠️ Development
 
 Use the project environments described by the repository setup, then run:
 
 ```bash
-python -m pytest
+npm ci
 npm run test:frontend
 npm run build
+python -m pytest
 ```
 
 Python code is checked with Ruff:
@@ -149,7 +152,7 @@ ruff check .
 ruff format --check .
 ```
 
-The frontend build writes distributable assets to `dash_devtools_plus/assets/`; commit those generated files whenever frontend source changes.
+The frontend build writes distributable assets to `dash_devtools_plus/assets/`, which is ignored by Git. Run `npm run build` after changing frontend source and before running Python tests, examples, or `python -m build`. CI builds these assets before testing and packaging; published Python packages still include them.
 
 ## 🗺️ Documentation map
 

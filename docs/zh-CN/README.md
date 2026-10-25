@@ -2,7 +2,7 @@
 
 这里是 Dash Devtools Plus 的中文探索地图：从首次打开到逐项深入查看，一路都有清晰指引 ✨。
 
-这些说明及更新后的回调截图对应 **0.1.4（未发布）**。运行当前源码请参阅[快速开始](quick-start.md#体验未发布的-014)，版本摘要见 [CHANGELOG](../../CHANGELOG.md)。
+运行当前源码请参阅[快速开始](quick-start.md#从源码安装)，版本摘要见 [CHANGELOG](../../CHANGELOG.md)。
 
 | 主题 | 说明 |
 | --- | --- |
@@ -24,3 +24,4 @@
 | 依赖库 | 按类别呈现项目直接导入的依赖 | [查看](features/dependencies.md) |
 | 工具条换肤 | 预览并应用 Dash 原生 Dev Tools 工具栏主题 | [查看](features/toolbar-skins.md) |
 | 运行环境信息 | 汇总并复制必要的 Python、系统、浏览器与第三方包版本 | [查看](features/runtime-environment.md) |
+| FastAPI 接口文档 | 按服务端实际地址嵌入并切换 Swagger UI 与 ReDoc | [查看](features/fastapi-docs.md) |
