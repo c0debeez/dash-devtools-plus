@@ -52,6 +52,25 @@ def test_devtools_config_has_no_metrics_route():
     assert any(item["namespace"] == "DashDevtoolsPlus" for item in config["dev_tools"])
 
 
+def test_host_theme_configuration():
+    try:
+        configure_devtools_plus(color_scheme="dark", theme_selector="#app-theme")
+        props = plugin._component_props()
+        assert props["colorScheme"] == "dark"
+        assert props["themeSelector"] == "#app-theme"
+        for invalid in ("system", "", None):
+            with pytest.raises(ValueError, match="color_scheme"):
+                configure_devtools_plus(color_scheme=invalid)
+        for invalid in ("", "  ", 123):
+            with pytest.raises(ValueError, match="theme_selector"):
+                configure_devtools_plus(theme_selector=invalid)
+        assert plugin._component_props()["colorScheme"] == "dark"
+    finally:
+        configure_devtools_plus()
+    assert plugin._component_props()["colorScheme"] == "auto"
+    assert plugin._component_props()["themeSelector"] is None
+
+
 def test_flask_backend_does_not_expose_fastapi_docs_panel():
     app = Dash(__name__)
     assert plugin._component_props_for(app)["fastapiDocs"] is None

@@ -14,7 +14,7 @@ from functools import lru_cache, wraps
 from importlib import metadata
 from pathlib import Path, PurePosixPath, PureWindowsPath
 from threading import Lock
-from typing import Any, Optional, Union
+from typing import Any, Literal, Optional, Union
 from urllib.parse import quote
 from weakref import WeakKeyDictionary, ref
 
@@ -45,6 +45,8 @@ _APP_CLIENTSIDE_SOURCES: WeakKeyDictionary[Any, dict[str, dict[str, Any]]] = (
 _CONFIG: dict[str, Any] = {
     "defaultLocale": "en",
     "accentColor": "#119DFF",
+    "colorScheme": "auto",
+    "themeSelector": None,
 }
 _CALLBACKS_ROUTE = "_dash-devtools-plus/callbacks"
 _DEPENDENCIES_ROUTE = "_dash-devtools-plus/dependencies"
@@ -75,6 +77,8 @@ def configure_devtools_plus(
     *,
     default_locale: str = "en",
     accent_color: str = "#119DFF",
+    color_scheme: Literal["auto", "light", "dark"] = "auto",
+    theme_selector: Optional[str] = None,
     editor: Optional[str] = "vscode",
     project_root: Optional[Union[str, Path]] = None,
     editor_project_root: Optional[Union[str, Path]] = None,
@@ -89,6 +93,12 @@ def configure_devtools_plus(
 
     if default_locale not in {"en", "zh-CN"}:
         raise ValueError("default_locale must be 'en' or 'zh-CN'")
+    if color_scheme not in {"auto", "light", "dark"}:
+        raise ValueError("color_scheme must be 'auto', 'light' or 'dark'")
+    if theme_selector is not None and (
+        not isinstance(theme_selector, str) or not theme_selector.strip()
+    ):
+        raise ValueError("theme_selector must be a non-empty CSS selector or None")
     if editor not in {*_SUPPORTED_EDITORS, None}:
         supported = ", ".join(repr(name) for name in _EDITOR_ORDER)
         raise ValueError(f"editor must be one of {supported}, or None")
@@ -111,6 +121,8 @@ def configure_devtools_plus(
     _CONFIG.update(
         defaultLocale=default_locale,
         accentColor=accent_color,
+        colorScheme=color_scheme,
+        themeSelector=theme_selector,
     )
     register()
 

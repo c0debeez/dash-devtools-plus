@@ -6,7 +6,7 @@ import "./styles.css";
 import "./dark.css";
 import embeddedStyles from "./styles.css?inline";
 import embeddedDarkStyles from "./dark.css?inline";
-import {observeColorScheme} from "./colorScheme";
+import {createColorSchemeController} from "./colorScheme";
 import {installCallbackPerformanceMonitor} from "./callbackPerformance";
 
 const STYLE_ELEMENT_ID = "dash-devtools-plus-runtime-styles";
@@ -25,7 +25,7 @@ if (!styleElement) {
 // embedding it as a runtime fallback for environments that omit or cache the
 // hook-provided CSS asset.
 styleElement.textContent = embeddedStyles + embeddedDarkStyles;
-observeColorScheme(document, window.matchMedia?.("(prefers-color-scheme: dark)"));
+const colorSchemeController = createColorSchemeController(document, window.matchMedia?.("(prefers-color-scheme: dark)"));
 
 // Dash can restore its native toolbar in a collapsed state without mounting
 // menu content. Restore the saved toolbar skin as the bundle initializes so
@@ -41,4 +41,7 @@ observeNativeErrorFrames(document);
 
 window.DashDevtoolsPlus = Object.assign(window.DashDevtoolsPlus || {}, {
   DevtoolsPlus,
+  configureTheme: options => colorSchemeController.configure(options),
+  setColorScheme: colorScheme => colorSchemeController.configure({colorScheme}),
+  refreshTheme: () => colorSchemeController.refresh(),
 });

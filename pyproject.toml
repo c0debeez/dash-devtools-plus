@@ -41,9 +41,8 @@ fastapi = ["dash[fastapi]>=4.2"]
 dash-devtools-plus = "dash_devtools_plus"
 
 [project.urls]
-Repository = "https://github.com/c0debeez/dash-devtools-plus"
-Issues = "https://github.com/c0debeez/dash-devtools-plus/issues"
-Upstream = "https://github.com/CNFeffery/dash-devtools-plus"
+Repository = "https://github.com/CNFeffery/dash-devtools-plus"
+Issues = "https://github.com/CNFeffery/dash-devtools-plus/issues"
 
 [tool.setuptools.packages.find]
 include = ["dash_devtools_plus*"]

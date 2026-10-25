@@ -23,19 +23,6 @@
 
 ## 🚀 打开 Devtools Plus
 
-### 主站主题适配分支
-
-此 fork 为抽屉、监控图表、原生工具栏皮肤和同源错误页面增加自动亮暗主题支持。
-主站根节点的主题优先于系统偏好，切换亮暗模式不会重置已选择的工具栏皮肤。
-Python 后端保持上游 `v0.1.4` 基线。
-
-```bash
-uv add "git+https://github.com/c0debeez/dash-devtools-plus@fix/host-theme"
-```
-
-生产应用应在 `[tool.uv.sources]` 中固定完整提交 SHA。本分支包含已构建的前端资源，
-通过 Git 安装无需 npm。来源与构建说明见 [UPSTREAM.md](./UPSTREAM.md)。
-
 以调试模式启动 Dash 应用后，在原生右下角工具栏中点击 **Devtools Plus**。抽屉会覆盖在应用上方，随时可以开始深入查看。
 
 ![Dash Devtools Plus 中文主面板](./imgs/docs/main-panel-zh-CN.webp)
@@ -97,6 +84,8 @@ configure_devtools_plus(
 | --- | --- | --- |
 | `default_locale` | `"en"` | 初始界面语言：`"en"` 或 `"zh-CN"`。 |
 | `accent_color` | `"#119DFF"` | 界面主强调色。 |
+| `color_scheme` | `"auto"` | 自动跟随宿主亮暗模式，或固定为 `"light"` / `"dark"`。 |
+| `theme_selector` | `None` | 可选的宿主主题容器 CSS 选择器。 |
 | `editor` | `"vscode"` | 源码打开时首选的编辑器：`"vscode"`、`"cursor"`、`"pycharm"` 或 `None`。 |
 | `project_root` | `None` | 服务器端使用的项目源码与直接导入扫描边界，必须是存在的目录。 |
 | `editor_project_root` | `None` | Dash 服务端与本地浏览器/IDE 文件路径不同时，编辑器可见的项目根目录。 |

@@ -23,21 +23,6 @@
 
 ## 🚀 Open Devtools Plus
 
-### Host Theme Fork
-
-This fork adds automatic light/dark theming for the drawer, monitoring charts,
-native toolbar skins and same-origin error frames. The host root theme takes
-priority over the system preference, and switching schemes preserves the
-selected toolbar skin. The Python backend stays on upstream `v0.1.4`.
-
-```bash
-uv add "git+https://github.com/c0debeez/dash-devtools-plus@fix/host-theme"
-```
-
-For reproducible application deployments, pin the full tested commit SHA in
-`[tool.uv.sources]`. Built frontend assets are included in this branch; installing
-from Git does not need npm. See [UPSTREAM.md](./UPSTREAM.md) for provenance.
-
 Start a Dash application in debug mode, then select **Devtools Plus** from the native toolbar in the lower-right corner. The drawer opens over the application, ready for a closer look.
 
 ![Dash Devtools Plus main panel in English](./imgs/docs/main-panel-en.webp)
@@ -99,6 +84,8 @@ configure_devtools_plus(
 | --- | --- | --- |
 | `default_locale` | `"en"` | Initial interface language: `"en"` or `"zh-CN"`. |
 | `accent_color` | `"#119DFF"` | Primary UI accent color. |
+| `color_scheme` | `"auto"` | Follow the host scheme, or force `"light"` / `"dark"`. |
+| `theme_selector` | `None` | Optional CSS selector for the host theme container. |
 | `editor` | `"vscode"` | Preferred source editor: `"vscode"`, `"cursor"`, `"pycharm"`, or `None`. |
 | `project_root` | `None` | Existing project directory used as the server-side source and direct-import boundary. |
 | `editor_project_root` | `None` | Editor-visible root when the browser/IDE and Dash server use different paths. |

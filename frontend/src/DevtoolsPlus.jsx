@@ -72,6 +72,8 @@ function BrandMark() {
 function EnabledDevtoolsPlus({
   defaultLocale = "en",
   accentColor = "#119DFF",
+  colorScheme: configuredColorScheme = "auto",
+  themeSelector = null,
   callbacksEndpoint = "_dash-devtools-plus/callbacks",
   dependenciesEndpoint = "_dash-devtools-plus/dependencies",
   serverMetricsEndpoint = "_dash-devtools-plus/server-metrics",
@@ -99,6 +101,10 @@ function EnabledDevtoolsPlus({
     algorithm: colorScheme === "dark" ? themeAlgorithms.darkAlgorithm : themeAlgorithms.defaultAlgorithm,
   }), [accentColor, colorScheme]);
   const serverMetrics = useServerMetrics(serverMetricsEndpoint);
+
+  useEffect(() => {
+    window.DashDevtoolsPlus?.configureTheme({colorScheme: configuredColorScheme, themeSelector});
+  }, [configuredColorScheme, themeSelector]);
 
   useEffect(() => {
     const sync = () => setColorScheme(document.documentElement.getAttribute(COLOR_SCHEME_ATTRIBUTE) || "light");
