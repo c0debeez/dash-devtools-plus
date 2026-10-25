@@ -3,7 +3,10 @@ import DevtoolsPlus from "./DevtoolsPlus";
 import {applyNativeDevtoolsTheme, readNativeDevtoolsTheme} from "./nativeDevtoolsTheme";
 import {observeNativeErrorFrames} from "./nativeErrorFrameTheme";
 import "./styles.css";
+import "./dark.css";
 import embeddedStyles from "./styles.css?inline";
+import embeddedDarkStyles from "./dark.css?inline";
+import {observeColorScheme} from "./colorScheme";
 import {installCallbackPerformanceMonitor} from "./callbackPerformance";
 
 const STYLE_ELEMENT_ID = "dash-devtools-plus-runtime-styles";
@@ -21,7 +24,8 @@ if (!styleElement) {
 // Keep the standalone stylesheet for normal Dash resource loading, while also
 // embedding it as a runtime fallback for environments that omit or cache the
 // hook-provided CSS asset.
-styleElement.textContent = embeddedStyles;
+styleElement.textContent = embeddedStyles + embeddedDarkStyles;
+observeColorScheme(document, window.matchMedia?.("(prefers-color-scheme: dark)"));
 
 // Dash can restore its native toolbar in a collapsed state without mounting
 // menu content. Restore the saved toolbar skin as the bundle initializes so

@@ -1,6 +1,6 @@
 import React, {useEffect, useMemo, useRef, useState} from "react";
 import {Chart} from "@antv/g2";
-import {Popover, Tooltip} from "antd";
+import {Popover, Tooltip, theme} from "antd";
 import {ArrowDownOutlined, ArrowUpOutlined, DownOutlined, InfoCircleOutlined} from "@ant-design/icons";
 import {useCallbackPerformance} from "./useCallbackPerformance";
 import {createLiveLegendChart} from "./liveLegendChart";
@@ -35,6 +35,8 @@ function Status({status, code, t}) {
 }
 
 function DurationChart({history, presentation, t}) {
+  const {token} = theme.useToken();
+  const chartTheme = token.colorBgBase === "#000" ? "classicDark" : "classic";
   const containerRef = useRef(null);
   const controllerRef = useRef(null);
   const selectionRef = useRef(null);
@@ -48,11 +50,12 @@ function DurationChart({history, presentation, t}) {
     const chart = new Chart({container: containerRef.current, autoFit: true, height: 180});
     chart.options({
       type: "view", data, paddingTop: 30, paddingLeft: 38, paddingRight: 8, paddingBottom: 22,
+      theme: {type: chartTheme, view: {viewFill: "transparent"}},
       encode: {x: "sample", y: "duration", color: "phase"},
       scale: {x: {padding: 0.4}, y: {nice: true, tickCount: 3}, color: {domain: phases, range: phases.map((phase) => PHASE_COLORS[phase])}},
       axis: {
-        x: {title: false, tick: false, line: false, labelFontSize: 10, labelFill: "#7b8a99", labelAutoHide: true},
-        y: {title: false, tick: false, line: false, labelFontSize: 10, labelFill: "#7b8a99", grid: true, gridStroke: "#e8edf1", gridLineDash: [3, 3]},
+        x: {title: false, tick: false, line: false, labelFontSize: 10, labelFill: token.colorTextSecondary, labelAutoHide: true},
+        y: {title: false, tick: false, line: false, labelFontSize: 10, labelFill: token.colorTextSecondary, grid: true, gridStroke: token.colorBorderSecondary, gridLineDash: [3, 3]},
       },
       legend: {color: {position: "top", layout: {justifyContent: "flex-end"}, labelFontSize: 10,
         labelFormatter: (phase) => t(PHASE_LABELS[phase]), defaultSelect: selectionRef.current ?? undefined}},
@@ -62,10 +65,10 @@ function DurationChart({history, presentation, t}) {
     const controller = createLiveLegendChart(chart, phases, data, selectionRef);
     controllerRef.current = controller;
     return () => { controller.destroy(); controllerRef.current = null; };
-  }, [phaseKey, t]);
+  }, [phaseKey, t, chartTheme, token.colorTextSecondary, token.colorBorderSecondary]);
   useEffect(() => {
     controllerRef.current?.update(data).catch((error) => console.warn("[dash-devtools-plus] Performance chart failed", error));
-  }, [data, phaseKey, t]);
+  }, [data, phaseKey, t, chartTheme, token.colorTextSecondary, token.colorBorderSecondary]);
   return <div className="ddp-perf-chart">
     <div className="ddp-perf-chart-heading"><span>{t("performanceTrend")}</span><small>{t("performanceRecentSamples").replace("{count}", records.length)} · ms</small></div>
     {records.length ? <div ref={containerRef} className="ddp-perf-chart-canvas" role="img" aria-label={t("performanceTrend")} />

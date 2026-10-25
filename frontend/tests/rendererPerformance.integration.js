@@ -43,6 +43,10 @@ assert.equal(monitor.getCallback("out.children").averageMs, 60);
 // the upstream blind spot rather than merely assuming the mock profile shape.
 const body = moduleBody("./src/actions/callbacks.ts");
 const imports = [...body.matchAll(/var (\w+) = __webpack_require__\([^;]+;/g)].map(([line]) => line).join("\n");
+// Dash 4's compiled HTTP handler uses these helpers from the same module.
+// Execute the shipped implementations rather than replacing the real handler.
+const helpers = body.split("\n").filter((line) =>
+  /^function (?:asyncGeneratorStep|_asyncToGenerator|_regenerator(?:Define\d*)?)\(/.test(line)).join("\n");
 const start = body.indexOf("function handleServerside(");
 assert.ok(start >= 0, "Renderer HTTP handler not found");
 const end = body.indexOf("\n/**", start);
@@ -51,7 +55,7 @@ const http = vm.createContext({
   __webpack_require__: requireModule, Date, JSON, Promise, Number, setTimeout,
   fetch: async () => ({status: 500}), updateResourceUsage: (payload) => ({type: "UPDATE_RESOURCE_USAGE", payload}),
 });
-vm.runInContext(imports + "\n" + body.slice(start, end), http);
+vm.runInContext(imports + "\n" + helpers + "\n" + body.slice(start, end), http);
 let failure;
 try {
   await http.handleServerside((action) => { actions++; dispatch(action); }, {}, {ui: true, fetch: {}}, {output: "out.children", inputs: []}, false, [], () => state);

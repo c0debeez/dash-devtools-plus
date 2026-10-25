@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useMemo, useState} from "react";
-import {Button, ConfigProvider, Drawer, Segmented, Tabs, Tooltip} from "antd";
+import {Button, ConfigProvider, Drawer, Segmented, Tabs, Tooltip, theme as themeAlgorithms} from "antd";
 import {
   ApartmentOutlined,
   BgColorsOutlined,
@@ -24,6 +24,7 @@ import StateSnapshotsPanel from "./StateSnapshotsPanel";
 import {createTranslator, normalizeLocale} from "./i18n";
 import {getAntdLocale} from "./i18n/antd";
 import {createDevtoolsTheme} from "./theme";
+import {COLOR_SCHEME_ATTRIBUTE, COLOR_SCHEME_EVENT, resolveColorScheme} from "./colorScheme";
 import {usesInternalTabScroll} from "./utils";
 import {syncNativeErrorFrameTheme} from "./nativeErrorFrameTheme";
 import {
@@ -78,6 +79,9 @@ function EnabledDevtoolsPlus({
   const isOpen = popup === POPUP_ID;
   const buttonClassName = useDevtoolMenuButtonClassName(POPUP_ID);
   const [locale, setLocale] = useState(() => initialLocale(defaultLocale));
+  const [colorScheme, setColorScheme] = useState(() =>
+    document.documentElement.getAttribute(COLOR_SCHEME_ATTRIBUTE) ||
+    resolveColorScheme(document.documentElement, window.matchMedia?.("(prefers-color-scheme: dark)")));
   const [nativeDevtoolsTheme, setNativeDevtoolsTheme] = useState(initialNativeDevtoolsTheme);
   const [activeTab, setActiveTab] = useState("callbacks");
   const [inspectionTrail, setInspectionTrail] = useState([]);
@@ -85,8 +89,18 @@ function EnabledDevtoolsPlus({
   const [isInspecting, setIsInspecting] = useState(false);
   const t = useMemo(() => createTranslator(locale), [locale]);
   const antdLocale = useMemo(() => getAntdLocale(locale), [locale]);
-  const antdTheme = useMemo(() => createDevtoolsTheme(accentColor), [accentColor]);
+  const antdTheme = useMemo(() => ({
+    ...createDevtoolsTheme(accentColor, colorScheme),
+    algorithm: colorScheme === "dark" ? themeAlgorithms.darkAlgorithm : themeAlgorithms.defaultAlgorithm,
+  }), [accentColor, colorScheme]);
   const serverMetrics = useServerMetrics(serverMetricsEndpoint);
+
+  useEffect(() => {
+    const sync = () => setColorScheme(document.documentElement.getAttribute(COLOR_SCHEME_ATTRIBUTE) || "light");
+    window.addEventListener(COLOR_SCHEME_EVENT, sync);
+    sync();
+    return () => window.removeEventListener(COLOR_SCHEME_EVENT, sync);
+  }, []);
 
   useEffect(() => {
     try {

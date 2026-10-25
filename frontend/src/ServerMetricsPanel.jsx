@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {Chart} from "@antv/g2";
-import {Alert, Button, Progress, Skeleton, Tag, Tooltip} from "antd";
+import {Alert, Button, Progress, Skeleton, Tag, Tooltip, theme} from "antd";
 import {
   CloudServerOutlined,
   ClockCircleOutlined,
@@ -50,6 +50,7 @@ function formatDuration(seconds, t) {
 }
 
 function MetricCard({icon, label, value, percent, detail, color, className = ""}) {
+  const {token} = theme.useToken();
   return (
     <article className={`ddp-metric-card ${className}`}>
       <div className="ddp-metric-card-heading">
@@ -61,7 +62,7 @@ function MetricCard({icon, label, value, percent, detail, color, className = ""}
         percent={clampPercent(percent)}
         showInfo={false}
         strokeColor={color}
-        trailColor="#edf2f5"
+        trailColor={token.colorFillSecondary}
         size={["100%", 6]}
       />
       <div className="ddp-metric-detail">{detail}</div>
@@ -70,6 +71,8 @@ function MetricCard({icon, label, value, percent, detail, color, className = ""}
 }
 
 function TrendChart({history, t}) {
+  const {token} = theme.useToken();
+  const chartTheme = token.colorBgBase === "#000" ? "classicDark" : "classic";
   const containerRef = useRef(null);
   const controllerRef = useRef(null);
   const selectedMetricsRef = useRef(null);
@@ -84,6 +87,7 @@ function TrendChart({history, t}) {
     const chart = new Chart({container: containerRef.current, autoFit: true, height: 248});
     chart.options({
       type: "view",
+      theme: {type: chartTheme, view: {viewFill: "transparent"}},
       data: chartData,
       paddingLeft: 54,
       paddingRight: 24,
@@ -131,13 +135,13 @@ function TrendChart({history, t}) {
       controller.destroy();
       controllerRef.current = null;
     };
-  }, [t]);
+  }, [t, chartTheme]);
 
   useEffect(() => {
     controllerRef.current?.update(chartData).catch((error) => {
       console.warn("[dash-devtools-plus] Metrics chart render failed", error);
     });
-  }, [chartData, t]);
+  }, [chartData, t, chartTheme]);
 
   return <div ref={containerRef} className="ddp-resource-chart" aria-label={t("resourceTrendChart")} />;
 }

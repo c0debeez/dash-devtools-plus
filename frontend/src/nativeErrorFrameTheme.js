@@ -2,6 +2,7 @@ import {
   NATIVE_DEVTOOLS_THEME_ATTRIBUTE,
   NATIVE_DEVTOOLS_THEME_IDS,
 } from "./nativeDevtoolsTheme.js";
+import {COLOR_SCHEME_ATTRIBUTE} from "./colorScheme.js";
 
 export const NATIVE_ERROR_FRAME_STYLE_ID = "dash-devtools-plus-native-error-frame-theme";
 
@@ -102,6 +103,17 @@ const FRAME_CSS_BY_THEME = Object.freeze(
   ),
 );
 
+const DARK_FRAME_CSS_BY_THEME = Object.fromEntries(
+  [NATIVE_DEVTOOLS_THEME_IDS.native, ...Object.keys(FRAME_PALETTES)].map(themeId => [themeId, frameCss({
+    page: "#0d1117", ink: "#e6edf3", muted: "#8b949e",
+    panel: "#161b22", panelBorder: "#30363d", heading: "#1c232d",
+    headingInk: "#e6edf3", code: "#10151c", codeInk: "#b1bac4",
+    error: "#351b20", errorBorder: "#74333f", danger: "#ff8c95",
+    current: "#351b20", currentBorder: "#ff8c95",
+    radius: FRAME_PALETTES[themeId]?.radius || "8px",
+  })]),
+);
+
 function frameDocument(frame) {
   try {
     return frame.contentDocument;
@@ -116,7 +128,9 @@ export function syncNativeErrorFrameTheme(hostDocument) {
   if (!hostRoot?.getAttribute || !hostDocument?.querySelectorAll) return;
 
   const themeId = hostRoot.getAttribute(NATIVE_DEVTOOLS_THEME_ATTRIBUTE);
-  const css = FRAME_CSS_BY_THEME[themeId];
+  const css = hostRoot.getAttribute(COLOR_SCHEME_ATTRIBUTE) === "dark"
+    ? DARK_FRAME_CSS_BY_THEME[themeId || NATIVE_DEVTOOLS_THEME_IDS.native]
+    : FRAME_CSS_BY_THEME[themeId];
   const accentColor = hostRoot.style?.getPropertyValue?.("--ddp-native-toolbar-accent") || "#119DFF";
 
   for (const frame of hostDocument.querySelectorAll(".dash-error-card .dash-backend-error iframe")) {
@@ -177,7 +191,8 @@ export function observeNativeErrorFrames(hostDocument, Observer = globalThis.Mut
     });
   };
   const observer = new Observer(scheduleSync);
-  observer.observe(hostDocument.documentElement, {childList: true, subtree: true});
+  observer.observe(hostDocument.documentElement, {childList: true, subtree: true,
+    attributes: true, attributeFilter: [NATIVE_DEVTOOLS_THEME_ATTRIBUTE, COLOR_SCHEME_ATTRIBUTE]});
   hostDocument.addEventListener?.("load", scheduleSync, true);
   scheduleSync();
 

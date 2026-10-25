@@ -1,5 +1,6 @@
-/** Central light-only Ant Design theme for Devtools Plus. */
-export function createDevtoolsTheme(accentColor) {
+/** Token themes shared by normal controls and portal-rendered popups. */
+export function createDevtoolsTheme(accentColor, colorScheme = "light") {
+  const dark = colorScheme === "dark";
   const palette = {
     text: "#172b3f",
     textSecondary: "#63778b",
@@ -17,12 +18,21 @@ export function createDevtoolsTheme(accentColor) {
     selectSelectedText: "#2d6f62",
     shadow: "0 20px 48px rgba(24, 45, 66, 0.14), 0 3px 10px rgba(24, 45, 66, 0.06)",
   };
+  if (dark) Object.assign(palette, {
+    text: "#e6edf3", textSecondary: "#b1bac4", textTertiary: "#8b949e",
+    border: "#30363d", borderSecondary: "#262e38", layout: "#0d1117",
+    container: "#161b22", elevated: "#1c232d", control: "#161b22",
+    hover: "#212b36", selected: "#172940", selectHover: "#212b36",
+    selectSelected: "#172940", selectSelectedText: "#79b8ff",
+    shadow: "0 20px 48px rgba(0, 0, 0, 0.4)",
+  });
 
   return {
     cssVar: {prefix: "ddp", key: "dash-devtools-plus"},
     token: {
       colorPrimary: accentColor,
       colorInfo: accentColor,
+      colorBgBase: dark ? "#000" : "#fff",
       colorText: palette.text,
       colorTextSecondary: palette.textSecondary,
       colorTextTertiary: palette.textTertiary,
@@ -31,8 +41,8 @@ export function createDevtoolsTheme(accentColor) {
       colorBgLayout: palette.layout,
       colorBgContainer: palette.container,
       colorBgElevated: palette.elevated,
-      colorFillSecondary: "rgba(23, 43, 63, 0.05)",
-      colorFillTertiary: "rgba(23, 43, 63, 0.035)",
+      colorFillSecondary: dark ? "rgba(230, 237, 243, 0.08)" : "rgba(23, 43, 63, 0.05)",
+      colorFillTertiary: dark ? "rgba(230, 237, 243, 0.05)" : "rgba(23, 43, 63, 0.035)",
       borderRadius: 10,
       borderRadiusLG: 14,
       controlHeight: 40,
@@ -57,14 +67,14 @@ export function createDevtoolsTheme(accentColor) {
       Input: {
         colorBgContainer: palette.control,
         activeBorderColor: accentColor,
-        hoverBorderColor: "#b8cee0",
+        hoverBorderColor: dark ? "#6e7681" : "#b8cee0",
         activeShadow: `0 0 0 3px ${accentColor}18`,
         paddingBlock: 8,
       },
       Select: {
         colorBgContainer: palette.control,
         activeBorderColor: accentColor,
-        hoverBorderColor: "#b8cee0",
+        hoverBorderColor: dark ? "#6e7681" : "#b8cee0",
         activeOutlineColor: `${accentColor}18`,
         optionActiveBg: palette.selectHover,
         optionSelectedBg: palette.selectSelected,
@@ -74,19 +84,19 @@ export function createDevtoolsTheme(accentColor) {
         zIndexPopup: 100002,
       },
       Segmented: {
-        trackBg: "#f1f5f8",
+        trackBg: dark ? palette.layout : "#f1f5f8",
         trackPadding: 3,
         itemColor: palette.textSecondary,
         itemHoverColor: palette.text,
         itemHoverBg: palette.hover,
         itemActiveBg: palette.selected,
-        itemSelectedBg: "#ffffff",
+        itemSelectedBg: palette.container,
         itemSelectedColor: accentColor,
       },
       Tabs: {
         inkBarColor: accentColor,
         itemColor: palette.textSecondary,
-        itemHoverColor: "#294a65",
+        itemHoverColor: dark ? palette.text : "#294a65",
         itemActiveColor: accentColor,
         itemSelectedColor: accentColor,
         titleFontSize: 14,
@@ -96,12 +106,12 @@ export function createDevtoolsTheme(accentColor) {
       Card: {colorBgContainer: palette.container, bodyPaddingSM: 17},
       Table: {
         colorBgContainer: palette.container,
-        headerBg: "#f7f9fb",
+        headerBg: dark ? palette.layout : "#f7f9fb",
         headerColor: palette.textSecondary,
         headerSplitColor: "transparent",
         headerSortActiveBg: palette.selected,
         headerSortHoverBg: palette.selected,
-        bodySortBg: "#fbfdfe",
+        bodySortBg: dark ? palette.layout : "#fbfdfe",
         rowHoverBg: palette.hover,
         borderColor: palette.borderSecondary,
         cellPaddingBlockSM: 12,

@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import {COLOR_SCHEME_ATTRIBUTE} from "../src/colorScheme.js";
 
 import {
   LUMINOUS_ERROR_FRAME_CSS,
@@ -71,11 +72,24 @@ test("the Python traceback iframe skin is added and removed with the toolbar the
   }
   assert.equal(heightUpdates, 4, "each skin change remeasures the traceback");
 
+  hostAttributes.set(COLOR_SCHEME_ATTRIBUTE, "dark");
+  syncNativeErrorFrameTheme(hostDocument);
+  assert.match(injectedStyle.textContent, /#0d1117/i);
+  syncNativeErrorFrameTheme(hostDocument);
+  assert.equal(heightUpdates, 5, "unchanged dark theme does not remeasure");
+  hostAttributes.delete(COLOR_SCHEME_ATTRIBUTE);
+  syncNativeErrorFrameTheme(hostDocument);
+  assert.match(injectedStyle.textContent, /#fffbf9/i);
+
   hostAttributes.delete(NATIVE_DEVTOOLS_THEME_ATTRIBUTE);
   syncNativeErrorFrameTheme(hostDocument);
   assert.equal(injectedStyle, null);
   assert.equal(innerProperties.has("--ddp-native-toolbar-accent"), false);
-  assert.equal(heightUpdates, 5);
+  assert.equal(heightUpdates, 7);
+
+  hostAttributes.set(COLOR_SCHEME_ATTRIBUTE, "dark");
+  syncNativeErrorFrameTheme(hostDocument);
+  assert.match(injectedStyle.textContent, /#0d1117/i, "native skin also follows dark mode");
 });
 
 test("unavailable or cross-origin traceback frames do not break the toolbar", () => {
